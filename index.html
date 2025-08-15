@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta na
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #F9F9F9;
-            color: var(--text-color);
+;
             line-height: 1.6;
         }
         
@@ -1191,27 +1175,7 @@
                 addDebugInfo(`Nombre del error: ${err.name}`);
                 return false;
             }
-        }
-        
-        // Función para guardar sesión en localStorage
-        function saveSession(user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-        }
-        
-        // Función para cargar sesión desde localStorage
-        function loadSession() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                return JSON.parse(savedUser);
-            }
-            return null;
-        }
-        
-        // Función para obtener pacientes desde Supabase
-        async function getPatientsFromAPI() {
-            try {
-                addDebugInfo('Obteniendo pacientes desde Supabase...');
-                const { data, error } = await supabase
+        }pabase
                     .from('patients')
                     .select('*');
                 
