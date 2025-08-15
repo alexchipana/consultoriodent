@@ -1626,7 +1626,10 @@
                 return;
             }
 
-            // Guardar usuario en localStorage y mostrar la página principal
+            // Mostrar pantalla principal y cargar datos
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            // Guardar usuario en localStorage
             const user = {
                 email: email,
                 name: email.split('@')[0],
@@ -1637,12 +1640,9 @@
             document.getElementById('userAvatar').textContent = currentUser.avatar;
             document.getElementById('userName').textContent = currentUser.name;
             generateMenu();
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            loadDataFromAPI().then((success) => {
-                showSection('patients');
-                updateDashboard();
-            });
+            await loadDataFromAPI();
+            showSection('patients');
+            updateDashboard();
         }
         
         // Generar menú
@@ -2239,6 +2239,7 @@
                     const statusText = payment.status === 'paid' ? 'Pagado' : (payment.status === 'pending' ? 'Pendiente' : 'Vencido');
                     
                     modalContent += `
+
                         <tr>
                             <td>${payment.id}</td>
                             <td>${payment.treatment_id}</td>
