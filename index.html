@@ -1594,7 +1594,11 @@
             if (error) {
                 console.error('Error al iniciar sesión:', error);
                 const loginError = document.getElementById('loginError');
-                loginError.textContent = 'Error: ' + error.message;
+                if (error.message.includes('Invalid login credentials')) {
+                    loginError.textContent = 'Email o contraseña incorrectos. Verifique sus datos.';
+                } else {
+                    loginError.textContent = 'Error: ' + error.message;
+                }
                 loginError.style.display = 'block';
                 setTimeout(() => {
                     loginError.style.display = 'none';
