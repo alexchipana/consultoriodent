@@ -1455,59 +1455,26 @@
                         .in('treatment_id', treatmentIds);
                     
                     if (paymentsError) throw paymentsError;
-                    payments = paymentsData || [];
-                }
-                
-                addDebugInfo('Detalles del paciente obtenidos');
-                return {
-                    patient,
-                    treatments: treatments || [],
-                    payments
-                };
-            } catch (error) {
-                addDebugInfo(`Error al obtener detalles del paciente: ${error.message}`);
-                throw error;
-            }
-        }
-        
-        // Función para obtener estadísticas usando Supabase
-        async function getStatisticsFromAPI() {
-            try {
-                addDebugInfo('Obteniendo estadísticas desde Supabase...');
-                
-                // Obtener conteo de pacientes
-                const { count: patientsCount, error: patientsError } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true });
-                
-                if (patientsError) throw patientsError;
-                
-                // Obtener pagos de hoy
-                const today = new Date().toISOString().split('T')[0];
-                const { data: todayPayments, error: todayPaymentsError } = await supabase
-                    .from('payments')
-                    .select('*')
-                    .eq('date', today);
-                
-                if (todayPaymentsError) throw todayPaymentsError;
-                
-                const dailyRevenue = (todayPayments || []).reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
-                
-                // Obtener pagos de la última semana
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                const { data: weekPayments, error: weekPaymentsError } = await supabase
-                    .from('payments')
-                    .select('*')
-                    .gte('date', oneWeekAgo.toISOString().split('T')[0]);
-                
-                if (weekPaymentsError) throw weekPaymentsError;
-                
-                const weeklyRevenue = (weekPayments || []).reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
-                
-                // Obtener tratamientos de hoy
-                const { data: todayTreatments, error: todayTreatmentsError } = await supabase
-                    .from('treatments')
+            // Mostrar la pantalla principal automáticamente
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            // Usuario genérico
+            var user = {
+                email: 'demo',
+                name: 'Demo',
+                role: 'demo',
+                avatar: 'D'
+            };
+            saveSession(user);
+            currentUser = user;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.querySelector('.user-role').textContent = currentUser.role;
+            generateMenu();
+            loadDataFromAPI().then(function() {
+                showSection('patients');
+                updateDashboard();
+            });
                     .select('patient_id')
                     .eq('date', today);
                 
