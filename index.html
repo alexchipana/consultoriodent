@@ -1905,13 +1905,6 @@
                             <div class="finance-value">${(treatments || []).length}</div>
                         </div>
                     </div>
-                    ${totalPending > 0 ? `
-                    <div style="margin: 30px 0; text-align: right;">
-                        <button class="btn btn-primary" onclick="openCompletePaymentModal(${patient.id}, ${totalPending.toFixed(2)})">
-                            <i class="material-icons">attach_money</i> Completar Saldo
-                        </button>
-                    </div>
-                    ` : ''}
                     <div style="margin-top: 20px; text-align: right;">
                         <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
                     </div>
@@ -2303,73 +2296,6 @@
                 showSection('patients');
                 updateDashboard();
             });
-        });
-        
-        // Agrega el modal para completar el pago
-        <div id="completePaymentModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Completar Saldo Pendiente</h2>
-                    <button class="close-btn" onclick="closeCompletePaymentModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="completePaymentForm">
-                        <input type="hidden" id="completePaymentPatientId" />
-                        <div class="form-group">
-                            <label for="completePaymentAmount">Monto a pagar (Bs.)</label>
-                            <input type="number" id="completePaymentAmount" min="0" step="0.01" required />
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                            <button type="button" class="btn btn-secondary" onclick="closeCompletePaymentModal()">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="material-icons">check_circle</i> Pagar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        // Agrega las funciones JS para abrir/cerrar el modal y manejar el pago
-        function openCompletePaymentModal(patientId, amount) {
-            document.getElementById('completePaymentPatientId').value = patientId;
-            document.getElementById('completePaymentAmount').value = amount;
-            document.getElementById('completePaymentModal').style.display = 'flex';
-        }
-        function closeCompletePaymentModal() {
-            document.getElementById('completePaymentModal').style.display = 'none';
-            document.getElementById('completePaymentForm').reset();
-        }
-        document.getElementById('completePaymentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const patientId = parseInt(document.getElementById('completePaymentPatientId').value);
-            const amount = parseFloat(document.getElementById('completePaymentAmount').value);
-            if (amount <= 0) return;
-            // Busca el tratamiento pendiente más reciente
-            const patientTreatments = (treatments || []).filter(t => t.patient_id === patientId);
-            patientTreatments.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const latestTreatment = patientTreatments.find(t => {
-                const payment = (payments || []).find(p => p.treatment_id === t.id);
-                return payment && payment.status === 'pending';
-            });
-            if (!latestTreatment) {
-                showNotification('No hay tratamiento pendiente para este paciente', 'error');
-                return;
-            }
-            // Registra el pago en Supabase
-            const newPayment = {
-                treatment_id: latestTreatment.id,
-                amount: amount,
-                date: new Date().toISOString().split('T')[0],
-                status: 'paid'
-            };
-            await addPaymentToAPI(newPayment);
-            closeCompletePaymentModal();
-            showNotification('Saldo completado con éxito');
-            // Recarga datos y actualiza detalles
-            await loadDataFromAPI();
-            showPatientDetails(patientId);
-            updateDashboard();
         });
     </script>
 </body>
