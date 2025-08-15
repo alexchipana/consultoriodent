@@ -1658,11 +1658,6 @@
         // Cerrar sesión
         async function logout() {
             addDebugInfo('Cerrando sesión');
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                console.error('Error al cerrar sesión:', error);
-                showNotification('Error al cerrar sesión: ' + error.message, 'error');
-            }
             // onAuthStateChange will handle UI changes
         }
         
