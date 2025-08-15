@@ -823,48 +823,6 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-card">
-            <i class="material-icons login-logo">healing</i>
-            <h2 class="login-title">Consultorio Dental</h2>
-            <p>Inicie sesión para acceder al sistema</p>
-            
-            <div class="error-message" id="loginError">
-                Usuario o contraseña incorrectos. Intente nuevamente.
-            </div>
-            
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">Email</label>
-                        <input type="text" id="username" required autocomplete="username">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required>
-                </div>
-                
-                <div class="login-options">
-                    <div class="remember-me">
-                        <input type="checkbox" id="rememberMe">
-                        <label for="rememberMe">Recordarme</label>
-                    </div>
-                    <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="material-icons">login</i>
-                    Iniciar Sesión
-                </button>
-            </form>
-            
-            <div class="login-footer">
-                <p>© 2025 Consultorio Dental</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Application (Hidden initially) -->
     <div id="mainApp" style="display: none;">
         <header>
@@ -2368,9 +2326,7 @@
         // Inicialización cuando el DOM está cargado
         document.addEventListener('DOMContentLoaded', function() {
             addDebugInfo('DOM cargado, inicializando aplicación...');
-            
-            // Configurar eventos
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            // Configurar eventos (excepto login)
             document.getElementById('patientForm').addEventListener('submit', handleFormSubmit);
             document.getElementById('treatmentForm').addEventListener('submit', handleTreatmentSubmit);
             document.getElementById('searchInput2').addEventListener('input', handleSearch);
@@ -2378,56 +2334,25 @@
             document.getElementById('advancePayment').addEventListener('input', calculateBalance);
             document.getElementById('treatmentPrice2').addEventListener('input', calculateBalance2);
             document.getElementById('advancePayment2').addEventListener('input', calculateBalance2);
-            
-            // Agregar evento para mostrar/ocultar panel de depuración
             document.addEventListener('keydown', function(e) {
-                // Ctrl+Shift+D para mostrar/ocultar panel de depuración
                 if (e.ctrlKey && e.shiftKey && e.key === 'D') {
                     toggleDebugPanel();
                 }
             });
-            
-            // Verificar si hay un usuario guardado en localStorage
-            const savedUser = loadSession();
-            if (savedUser) {
-                addDebugInfo('Usuario guardado encontrado');
-                currentUser = savedUser;
-                
-                // Actualizar la interfaz
-                document.getElementById('userAvatar').textContent = currentUser.avatar;
-                document.getElementById('userName').textContent = currentUser.name;
-                
-                // Generar menú
-                generateMenu();
-                
-                // Mostrar la aplicación principal
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                
-                // Cargar datos desde la API ANTES de mostrar la sección
-                loadDataFromAPI().then((success) => {
-                    if (success) {
-                        // Mostrar sección inicial (tabla de pacientes)
-                        showSection('patients');
-                        
-                        // Actualizar dashboard
-                        updateDashboard();
-                    } else {
-                        // Mostrar sección de todos modos
-                        showSection('patients');
-                        showNotification('No se pudieron cargar los datos. Intente recargar más tarde.', 'error');
-                    }
-                }).catch(error => {
-                    addDebugInfo(`Error al cargar datos iniciales: ${error.message}`);
-                    // Mostrar sección de todos modos
-                    showSection('patients');
-                    showNotification('Error al cargar datos. Intente recargar la página.', 'error');
-                });
-            } else {
-                addDebugInfo('No hay usuario guardado, cargando datos desde API...');
-                // Cargar datos desde la API
-                loadDataFromAPI();
-            }
+            // Mostrar directamente la aplicación principal y cargar datos
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            generateMenu();
+            loadDataFromAPI().then((success) => {
+                showSection('patients');
+                updateDashboard();
+                if (!success) {
+                    showNotification('No se pudieron cargar los datos. Intente recargar más tarde.', 'error');
+                }
+            }).catch(error => {
+                showSection('patients');
+                showNotification('Error al cargar datos. Intente recargar la página.', 'error');
+            });
         });
     </script>
 </body>
