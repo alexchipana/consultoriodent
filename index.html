@@ -1,4 +1,67 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio Dental - Sistema de Pacientes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        :root {
+            /* Paleta de colores minimalista y sobria */
+            --primary-color: #204362;
+            --secondary-color: #16879E;
+            --accent-color: #F9A825;
+            --danger-color: #D32F2F;
+            --light-color: #F5F5F5;
+            --dark-color: #263238;
+            --text-color: #212121;
+            --border-color: #E0E0E0;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            --transition-speed: 0.3s;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F9F9F9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
             font-size: 32px;
         }
         
@@ -1146,7 +1209,27 @@
                 addDebugInfo(`Nombre del error: ${err.name}`);
                 return false;
             }
-        }pabase
+        }
+        
+        // Función para guardar sesión en localStorage
+        function saveSession(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+        
+        // Función para cargar sesión desde localStorage
+        function loadSession() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                return JSON.parse(savedUser);
+            }
+            return null;
+        }
+        
+        // Función para obtener pacientes desde Supabase
+        async function getPatientsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo pacientes desde Supabase...');
+                const { data, error } = await supabase
                     .from('patients')
                     .select('*');
                 
