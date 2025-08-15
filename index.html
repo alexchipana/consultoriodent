@@ -1585,64 +1585,50 @@
             e.preventDefault();
             const email = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
 
             if (!email || !password) {
-                const loginError = document.getElementById('loginError');
-                loginError.textContent = 'Debe ingresar email y contraseña.';
+                loginError.textContent = 'Debe ingresar usuario y contraseña.';
                 loginError.style.display = 'block';
-                setTimeout(() => {
-                    loginError.style.display = 'none';
-                }, 3000);
+                setTimeout(() => { loginError.style.display = 'none'; }, 3000);
                 return;
             }
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                console.error('Error al iniciar sesión:', error);
-                const loginError = document.getElementById('loginError');
-                if (error.message.includes('Invalid login credentials')) {
-                    loginError.textContent = 'Email o contraseña incorrectos. Verifique sus datos.';
-                } else {
-                    loginError.textContent = 'Error: ' + error.message;
+            // Autenticación personalizada desde tabla Supabase
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', email)
+                    .eq('password', password)
+                    .single();
+                if (error || !data) {
+                    loginError.textContent = 'Usuario o contraseña incorrectos.';
+                    loginError.style.display = 'block';
+                    setTimeout(() => { loginError.style.display = 'none'; }, 3000);
+                    return;
                 }
+                // Usuario autenticado correctamente
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                const user = {
+                    email: data.username,
+                    name: data.username,
+                    avatar: data.username[0].toUpperCase(),
+                };
+                saveSession(user);
+                currentUser = user;
+                document.getElementById('userAvatar').textContent = currentUser.avatar;
+                document.getElementById('userName').textContent = currentUser.name;
+                generateMenu();
+                await loadDataFromAPI();
+                showSection('patients');
+                updateDashboard();
+            } catch (err) {
+                loginError.textContent = 'Error de conexión o de Supabase.';
                 loginError.style.display = 'block';
-                setTimeout(() => {
-                    loginError.style.display = 'none';
-                }, 3000);
-                return;
+                setTimeout(() => { loginError.style.display = 'none'; }, 3000);
             }
-
-            if (!data || !data.user) {
-                const loginError = document.getElementById('loginError');
-                loginError.textContent = 'No se pudo autenticar. Verifique que el usuario exista en Supabase Auth.';
-                loginError.style.display = 'block';
-                setTimeout(() => {
-                    loginError.style.display = 'none';
-                }, 3000);
-                return;
-            }
-
-            // Mostrar pantalla principal y cargar datos
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            // Guardar usuario en localStorage
-            const user = {
-                email: email,
-                name: email.split('@')[0],
-                avatar: email[0].toUpperCase(),
-            };
-            saveSession(user);
-            currentUser = user;
-            document.getElementById('userAvatar').textContent = currentUser.avatar;
-            document.getElementById('userName').textContent = currentUser.name;
-            generateMenu();
-            await loadDataFromAPI();
-            showSection('patients');
-            updateDashboard();
         }
         
         // Generar menú
