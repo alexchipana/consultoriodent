@@ -1583,24 +1583,23 @@
         // Manejar inicio de sesión
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('username').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const loginError = document.getElementById('loginError');
 
-            if (!email || !password) {
+            if (!username || !password) {
                 loginError.textContent = 'Debe ingresar usuario y contraseña.';
                 loginError.style.display = 'block';
                 setTimeout(() => { loginError.style.display = 'none'; }, 3000);
                 return;
             }
 
-            // Autenticación personalizada desde tabla Supabase
             try {
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
-                    .eq('username', email)
-                    .eq('password', password)
+                    .eq('user', username)
+                    .eq('pass', password)
                     .single();
                 if (error || !data) {
                     loginError.textContent = 'Usuario o contraseña incorrectos.';
@@ -1612,9 +1611,9 @@
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 const user = {
-                    email: data.username,
-                    name: data.username,
-                    avatar: data.username[0].toUpperCase(),
+                    email: data.user,
+                    name: data.user,
+                    avatar: data.user[0].toUpperCase(),
                 };
                 saveSession(user);
                 currentUser = user;
@@ -2238,6 +2237,7 @@
                 modalContent += `
                         </tbody>
                     </table>
+                    
                     
                     <div class="finance-summary" style="margin-top: 20px;">
                         <div class="finance-item">
