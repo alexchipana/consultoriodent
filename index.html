@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultorio Dental - Sistema de Pacientes</title>
+    <title>Clínica San&Crispín - Sistema de Pacientes</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -830,7 +830,7 @@
                 <div class="header-content">
                     <div class="logo">
                         <i class="material-icons">healing</i>
-                        <h1>Consultorio Dental</h1>
+                        <h1>Clínica San&Crispín</h1>
                     </div>
                     <nav>
                         <ul id="mainMenu">
@@ -981,15 +981,15 @@
                 
                 <div class="action-bar">
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="showSection('register')">
-                            <i class="material-icons">person_add</i>
-                            Registrar Paciente
+                        <button class="btn btn-primary" onclick="showSection('register')" style="display:flex;align-items:center;gap:6px;">
+                            <span class="material-icons" style="font-size:20px;vertical-align:middle;">person_add</span>
+                            <span style="vertical-align:middle;">Registrar Paciente</span>
                         </button>
                     </div>
                     <div class="search-box">
                         <div class="search-container">
                             <input type="text" id="searchInput" class="search-input" placeholder="Buscar paciente..." onkeyup="filterPatientsTable()">
-                            <i class="material-icons search-icon">search</i>
+                            <span class="material-icons search-icon" style="font-size:20px;vertical-align:middle;">search</span>
                         </div>
                     </div>
                 </div>
@@ -1539,21 +1539,18 @@
         function generateMenu() {
             const menuContainer = document.getElementById('mainMenu');
             menuContainer.innerHTML = '';
-            
-            // Menú único para todos los usuarios
+            // Menú simplificado y minimalista
             const menuItems = [
                 { id: 'patients', text: 'Pacientes', icon: 'group', active: true },
-                { id: 'dashboard', text: 'Dashboard', icon: 'dashboard' },
-                { id: 'register', text: 'Registrar Paciente', icon: 'person_add' },
-                { id: 'search', text: 'Buscar Pacientes', icon: 'search' }
+                { id: 'register', text: 'Registrar', icon: 'person_add' },
+                { id: 'dashboard', text: 'Resumen', icon: 'dashboard' }
             ];
-            
             menuItems.forEach(item => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <a href="#" onclick="showSection('${item.id}')" class="${item.active ? 'active' : ''}">
-                        <i class="material-icons">${item.icon}</i>
-                        ${item.text}
+                    <a href="#" onclick="showSection('${item.id}')" class="${item.active ? 'active' : ''}" style="display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:20px;vertical-align:middle;">${item.icon}</span>
+                        <span style="vertical-align:middle;">${item.text}</span>
                     </a>
                 `;
                 menuContainer.appendChild(li);
@@ -1899,6 +1896,7 @@
                         <div class="finance-item">
                             <div class="finance-label">Saldo Pendiente</div>
                             <div class="finance-value">Bs. ${totalPending.toFixed(2)}</div>
+                            <button class="btn btn-accent btn-small" onclick="completePendingBalance(${patient.id})" style="margin-top:8px;">Completar Saldo</button>
                         </div>
                         <div class="finance-item">
                             <div class="finance-label">Total Tratamientos</div>
@@ -2297,6 +2295,13 @@
                 updateDashboard();
             });
         });
+        
+        // Agrega la función para completar el saldo pendiente
+        function completePendingBalance(patientId) {
+            // Aquí podrías abrir un modal o prompt para registrar el pago total pendiente
+            alert('Funcionalidad para completar el saldo pendiente del paciente ID: ' + patientId);
+            // Aquí iría la lógica real para registrar el pago en Supabase
+        }
     </script>
 </body>
 </html>
