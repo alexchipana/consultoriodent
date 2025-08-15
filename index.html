@@ -823,48 +823,6 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-card">
-            <i class="material-icons login-logo">healing</i>
-            <h2 class="login-title">Consultorio Dental</h2>
-            <p>Inicie sesión para acceder al sistema</p>
-            
-            <div class="error-message" id="loginError">
-                Usuario o contraseña incorrectos. Intente nuevamente.
-            </div>
-            
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">Email</label>
-                        <input type="text" id="username" required autocomplete="username">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required>
-                </div>
-                
-                <div class="login-options">
-                    <div class="remember-me">
-                        <input type="checkbox" id="rememberMe">
-                        <label for="rememberMe">Recordarme</label>
-                    </div>
-                    <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="material-icons">login</i>
-                    Iniciar Sesión
-                </button>
-            </form>
-            
-            <div class="login-footer">
-                <p>© 2025 Consultorio Dental</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Application (Hidden initially) -->
     <div id="mainApp" style="display: none;">
         <header>
@@ -1455,26 +1413,55 @@
                         .in('treatment_id', treatmentIds);
                     
                     if (paymentsError) throw paymentsError;
-            // Mostrar la pantalla principal automáticamente
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            // Usuario genérico
-            var user = {
-                email: 'demo',
-                name: 'Demo',
-                role: 'demo',
-                avatar: 'D'
-            };
-            saveSession(user);
-            currentUser = user;
-            document.getElementById('userAvatar').textContent = currentUser.avatar;
-            document.getElementById('userName').textContent = currentUser.name;
-            document.querySelector('.user-role').textContent = currentUser.role;
-            generateMenu();
-            loadDataFromAPI().then(function() {
-                showSection('patients');
-                updateDashboard();
-            });
+                    payments = paymentsData;
+                }
+                
+                addDebugInfo(`Detalles del paciente ID ${patientId} obtenidos`);
+                return { patient, treatments, payments };
+            } catch (error) {
+                addDebugInfo(`Error al obtener detalles del paciente: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para obtener estadísticas para el dashboard
+        async function getStatisticsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo estadísticas para el dashboard...');
+                
+                // Obtener conteo de pacientes
+                const { data: patientsCount, error: patientsCountError } = await supabase
+                    .from('patients')
+                    .select('id', { count: 'exact', head: true });
+                
+                if (patientsCountError) throw patientsCountError;
+                
+                // Obtener ingresos diarios
+                const today = new Date().toISOString().split('T')[0];
+                const { data: dailyRevenueData, error: dailyRevenueError } = await supabase
+                    .from('payments')
+                    .select('amount')
+                    .eq('date', today);
+                
+                if (dailyRevenueError) throw dailyRevenueError;
+                
+                const dailyRevenue = (dailyRevenueData || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                
+                // Obtener ingresos semanales
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const { data: weeklyRevenueData, error: weeklyRevenueError } = await supabase
+                    .from('payments')
+                    .select('amount')
+                    .gte('date', oneWeekAgo.toISOString().split('T')[0]);
+                
+                if (weeklyRevenueError) throw weeklyRevenueError;
+                
+                const weeklyRevenue = (weeklyRevenueData || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                
+                // Obtener pacientes del día
+                const { data: todayTreatments, error: todayTreatmentsError } = await supabase
+                    .from('treatments')
                     .select('patient_id')
                     .eq('date', today);
                 
@@ -1547,58 +1534,436 @@
             }
         }
         
-        // Manejar inicio de sesión
-        async function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('loginError');
-
-            if (!username || !password) {
-                loginError.textContent = 'Debe ingresar usuario y contraseña.';
-                loginError.style.display = 'block';
-                setTimeout(() => { loginError.style.display = 'none'; }, 3000);
-                return;
+        // Pantalla principal y lógica de usuario demo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicialización directa de la app sin login
+            document.getElementById('mainApp').style.display = 'block';
+            var user = {
+                email: 'demo',
+                name: 'Demo',
+                role: 'demo',
+                avatar: 'D'
+            };
+            saveSession(user);
+            currentUser = user;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.querySelector('.user-role').textContent = currentUser.role;
+            generateMenu();
+            loadDataFromAPI().then(function() {
+                showSection('patients');
+                updateDashboard();
+            });
+        });
+        
+        // Función para agregar información de depuración
+        function addDebugInfo(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.push(`[${timestamp}] ${message}`);
+            console.log(message);
+            updateDebugPanel();
+        }
+        
+        // Función para actualizar el panel de depuración
+        function updateDebugPanel() {
+            const debugPanel = document.getElementById('debugInfo');
+            if (debugPanel) {
+                debugPanel.textContent = debugInfo.join('\n');
             }
-
+        }
+        
+        // Función para mostrar/ocultar el panel de depuración
+        function toggleDebugPanel() {
+            const debugPanel = document.getElementById('debugPanel');
+            debugPanel.classList.toggle('show');
+        }
+        
+        // Función para actualizar el estado de conexión
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                statusElement.innerHTML = '<i class="material-icons" style="font-size: 14px; margin-right: 4px;">wifi</i>Conectado';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                statusElement.innerHTML = '<i class="material-icons" style="font-size: 14px; margin-right: 4px;">wifi_off</i>Sin conexión';
+            }
+        }
+        
+        // Función para probar la conexión a Supabase
+        async function testSupabaseConnection() {
             try {
-                const { data, error } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .single();
-                if (error || !data) {
-                    loginError.textContent = 'Usuario o contraseña incorrectos.';
-                    loginError.style.display = 'block';
-                    setTimeout(() => { loginError.style.display = 'none'; }, 3000);
-                    return;
+                addDebugInfo('Probando conexión a Supabase...');
+                addDebugInfo(`URL: ${SUPABASE_URL}`);
+                addDebugInfo(`Key: ${SUPABASE_KEY ? 'Presente' : 'Ausente'}`);
+                
+                // Intentar una consulta simple
+                const { data, error } = await supabase.from('patients').select('count', { count: 'exact', head: true });
+
+                if (error) {
+                    addDebugInfo(`Error de conexión a Supabase: ${error.message}`);
+                    addDebugInfo(`Código de error: ${error.code}`);
+                    addDebugInfo(`Detalles: ${error.details || 'No disponibles'}`);
+                    return false;
                 }
-                // Usuario autenticado correctamente
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                const user = {
-                    e.preventDefault();
-                    // Mostrar directamente la página principal y cargar datos
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    // Usuario genérico
-                    var user = {
-                        email: 'demo',
-                        name: 'Demo',
-                        role: 'demo',
-                        avatar: 'D'
-                    };
-                    saveSession(user);
-                    currentUser = user;
-                    document.getElementById('userAvatar').textContent = currentUser.avatar;
-                    document.getElementById('userName').textContent = currentUser.name;
-                    document.querySelector('.user-role').textContent = currentUser.role;
-                    generateMenu();
-                    loadDataFromAPI().then(function() {
-                        showSection('patients');
-                        updateDashboard();
-                    });
+
+                // Si data es null, la tabla está vacía o no existe
+                if (!data) {
+                    addDebugInfo('Conexión exitosa, pero la tabla "patients" está vacía o no existe.');
+                    return true;
+                }
+
+                // Si data.count es undefined, mostrar 0
+                addDebugInfo(`Conexión exitosa a Supabase. Pacientes encontrados: ${typeof data.count !== 'undefined' ? data.count : 0}`);
+                return true;
+            } catch (err) {
+                addDebugInfo(`Error al probar conexión: ${err.message}`);
+                addDebugInfo(`Nombre del error: ${err.name}`);
+                return false;
+            }
+        }
+        
+        // Función para guardar sesión en localStorage
+        function saveSession(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+        
+        // Función para cargar sesión desde localStorage
+        function loadSession() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                return JSON.parse(savedUser);
+            }
+            return null;
+        }
+        
+        // Función para obtener pacientes desde Supabase
+        async function getPatientsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo pacientes desde Supabase...');
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*');
+                
+                if (error) {
+                    addDebugInfo(`Error al obtener pacientes: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Pacientes obtenidos: ${data ? data.length : 0}`);
+                return data || [];
+            } catch (error) {
+                addDebugInfo(`Error al obtener pacientes: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para agregar un paciente usando Supabase
+        async function addPatientToAPI(patientData) {
+            try {
+                addDebugInfo('Agregando paciente a Supabase...');
+                const { data, error } = await supabase
+                    .from('patients')
+                    .insert([patientData])
+                    .select();
+                
+                if (error) {
+                    addDebugInfo(`Error al agregar paciente: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Paciente agregado con ID: ${data[0].id}`);
+                return data[0].id;
+            } catch (error) {
+                addDebugInfo(`Error al agregar paciente: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para obtener tratamientos desde Supabase
+        async function getTreatmentsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo tratamientos desde Supabase...');
+                const { data, error } = await supabase
+                    .from('treatments')
+                    .select('*');
+                
+                if (error) {
+                    addDebugInfo(`Error al obtener tratamientos: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Tratamientos obtenidos: ${data ? data.length : 0}`);
+                return data || [];
+            } catch (error) {
+                addDebugInfo(`Error al obtener tratamientos: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para agregar un tratamiento usando Supabase
+        async function addTreatmentToAPI(treatmentData) {
+            try {
+                addDebugInfo('Agregando tratamiento a Supabase...');
+                const { data, error } = await supabase
+                    .from('treatments')
+                    .insert([treatmentData])
+                    .select();
+                
+                if (error) {
+                    addDebugInfo(`Error al agregar tratamiento: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Tratamiento agregado con ID: ${data[0].id}`);
+                return data[0].id;
+            } catch (error) {
+                addDebugInfo(`Error al agregar tratamiento: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para obtener pagos desde Supabase
+        async function getPaymentsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo pagos desde Supabase...');
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select('*');
+                
+                if (error) {
+                    addDebugInfo(`Error al obtener pagos: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Pagos obtenidos: ${data ? data.length : 0}`);
+                return data || [];
+            } catch (error) {
+                addDebugInfo(`Error al obtener pagos: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para agregar un pago usando Supabase
+        async function addPaymentToAPI(paymentData) {
+            try {
+                addDebugInfo('Agregando pago a Supabase...');
+                const { data, error } = await supabase
+                    .from('payments')
+                    .insert([paymentData])
+                    .select();
+                
+                if (error) {
+                    addDebugInfo(`Error al agregar pago: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Pago agregado con ID: ${data[0].id}`);
+                return data[0].id;
+            } catch (error) {
+                addDebugInfo(`Error al agregar pago: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para buscar pacientes usando Supabase
+        async function searchPatientsOnAPI(query) {
+            try {
+                addDebugInfo(`Buscando pacientes con query: ${query}`);
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .or(`full_name.ilike.%${query}%,id_number.ilike.%${query}%,phone.ilike.%${query}%`);
+                
+                if (error) {
+                    addDebugInfo(`Error al buscar pacientes: ${error.message}`);
+                    throw error;
+                }
+                
+                addDebugInfo(`Pacientes encontrados: ${data ? data.length : 0}`);
+                return data || [];
+            } catch (error) {
+                addDebugInfo(`Error al buscar pacientes: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para obtener detalles de un paciente usando Supabase
+        async function getPatientDetailsFromAPI(patientId) {
+            try {
+                addDebugInfo(`Obteniendo detalles del paciente ID: ${patientId}`);
+                
+                // Obtener paciente
+                const { data: patient, error: patientError } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (patientError) throw patientError;
+                
+                // Obtener tratamientos del paciente
+                const { data: treatments, error: treatmentsError } = await supabase
+                    .from('treatments')
+                    .select('*')
+                    .eq('patient_id', patientId);
+                
+                if (treatmentsError) throw treatmentsError;
+                
+                // Obtener IDs de tratamientos
+                const treatmentIds = (treatments || []).map(t => t.id);
+                
+                // Obtener pagos de los tratamientos
+                let payments = [];
+                if (treatmentIds.length > 0) {
+                    const { data: paymentsData, error: paymentsError } = await supabase
+                        .from('payments')
+                        .select('*')
+                        .in('treatment_id', treatmentIds);
+                    
+                    if (paymentsError) throw paymentsError;
+                    payments = paymentsData;
+                }
+                
+                addDebugInfo(`Detalles del paciente ID ${patientId} obtenidos`);
+                return { patient, treatments, payments };
+            } catch (error) {
+                addDebugInfo(`Error al obtener detalles del paciente: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Función para obtener estadísticas para el dashboard
+        async function getStatisticsFromAPI() {
+            try {
+                addDebugInfo('Obteniendo estadísticas para el dashboard...');
+                
+                // Obtener conteo de pacientes
+                const { data: patientsCount, error: patientsCountError } = await supabase
+                    .from('patients')
+                    .select('id', { count: 'exact', head: true });
+                
+                if (patientsCountError) throw patientsCountError;
+                
+                // Obtener ingresos diarios
+                const today = new Date().toISOString().split('T')[0];
+                const { data: dailyRevenueData, error: dailyRevenueError } = await supabase
+                    .from('payments')
+                    .select('amount')
+                    .eq('date', today);
+                
+                if (dailyRevenueError) throw dailyRevenueError;
+                
+                const dailyRevenue = (dailyRevenueData || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                
+                // Obtener ingresos semanales
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const { data: weeklyRevenueData, error: weeklyRevenueError } = await supabase
+                    .from('payments')
+                    .select('amount')
+                    .gte('date', oneWeekAgo.toISOString().split('T')[0]);
+                
+                if (weeklyRevenueError) throw weeklyRevenueError;
+                
+                const weeklyRevenue = (weeklyRevenueData || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                
+                // Obtener pacientes del día
+                const { data: todayTreatments, error: todayTreatmentsError } = await supabase
+                    .from('treatments')
+                    .select('patient_id')
+                    .eq('date', today);
+                
+                if (todayTreatmentsError) throw todayTreatmentsError;
+                
+                const todayPatientIds = [...new Set((todayTreatments || []).map(t => t.patient_id))];
+                const todayPatientsCount = todayPatientIds.length;
+                
+                // Obtener pacientes por día (últimos 7 días)
+                const dailyPatients = {};
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    const { count, error } = await supabase
+                        .from('patients')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('registration_date', dateStr);
+                    
+                    if (error) throw error;
+                    dailyPatients[dateStr] = count || 0;
+                }
+                
+                addDebugInfo('Estadísticas obtenidas');
+                return {
+                    patientsCount: patientsCount || 0,
+                    dailyRevenue,
+                    weeklyRevenue,
+                    todayPatientsCount,
+                    dailyPatients
+                };
+            } catch (error) {
+                addDebugInfo(`Error al obtener estadísticas: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Cargar datos desde la API
+        async function loadDataFromAPI() {
+            try {
+                addDebugInfo('Iniciando carga de datos desde Supabase...');
+                
+                // Probar conexión primero
+                supabaseConnected = await testSupabaseConnection();
+                updateConnectionStatus(supabaseConnected);
+                
+                if (!supabaseConnected) {
+                    throw new Error('No se pudo conectar a Supabase');
+                }
+                
+                // Cargar pacientes
+                patients = await getPatientsFromAPI();
+                
+                // Cargar tratamientos
+                treatments = await getTreatmentsFromAPI();
+                
+                // Cargar pagos
+                payments = await getPaymentsFromAPI();
+                
+                addDebugInfo('Datos cargados exitosamente desde Supabase');
+                return true;
+            } catch (error) {
+                addDebugInfo(`Error al cargar datos desde la API: ${error.message}`);
+                showNotification('Error al cargar los datos desde Supabase. Verifique la conexión.', 'error');
+                patients = [];
+                treatments = [];
+                payments = [];
+                return false;
+            }
+        }
+        
+        // Pantalla principal y lógica de usuario demo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicialización directa de la app sin login
+            document.getElementById('mainApp').style.display = 'block';
+            var user = {
+                email: 'demo',
+                name: 'Demo',
+                role: 'demo',
+                avatar: 'D'
+            };
+            saveSession(user);
+            currentUser = user;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.querySelector('.user-role').textContent = currentUser.role;
+            generateMenu();
+            loadDataFromAPI().then(function() {
+                showSection('patients');
+                updateDashboard();
+            });
+        });
         
         // Mostrar sección
         function showSection(sectionId) {
@@ -2306,67 +2671,24 @@
         
         // Inicialización cuando el DOM está cargado
         document.addEventListener('DOMContentLoaded', function() {
-            addDebugInfo('DOM cargado, inicializando aplicación...');
-            
-            // Configurar eventos
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('patientForm').addEventListener('submit', handleFormSubmit);
-            document.getElementById('treatmentForm').addEventListener('submit', handleTreatmentSubmit);
-            document.getElementById('searchInput2').addEventListener('input', handleSearch);
-            document.getElementById('treatmentPrice').addEventListener('input', calculateBalance);
-            document.getElementById('advancePayment').addEventListener('input', calculateBalance);
-            document.getElementById('treatmentPrice2').addEventListener('input', calculateBalance2);
-            document.getElementById('advancePayment2').addEventListener('input', calculateBalance2);
-            
-            // Agregar evento para mostrar/ocultar panel de depuración
-            document.addEventListener('keydown', function(e) {
-                // Ctrl+Shift+D para mostrar/ocultar panel de depuración
-                if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-                    toggleDebugPanel();
-                }
+            // Inicialización directa de la app sin login
+            document.getElementById('mainApp').style.display = 'block';
+            var user = {
+                email: 'demo',
+                name: 'Demo',
+                role: 'demo',
+                avatar: 'D'
+            };
+            saveSession(user);
+            currentUser = user;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.querySelector('.user-role').textContent = currentUser.role;
+            generateMenu();
+            loadDataFromAPI().then(function() {
+                showSection('patients');
+                updateDashboard();
             });
-            
-            // Verificar si hay un usuario guardado en localStorage
-            const savedUser = loadSession();
-            if (savedUser) {
-                addDebugInfo('Usuario guardado encontrado');
-                currentUser = savedUser;
-                
-                // Actualizar la interfaz
-                document.getElementById('userAvatar').textContent = currentUser.avatar;
-                document.getElementById('userName').textContent = currentUser.name;
-                
-                // Generar menú
-                generateMenu();
-                
-                // Mostrar la aplicación principal
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                
-                // Cargar datos desde la API ANTES de mostrar la sección
-                loadDataFromAPI().then((success) => {
-                    if (success) {
-                        // Mostrar sección inicial (tabla de pacientes)
-                        showSection('patients');
-                        
-                        // Actualizar dashboard
-                        updateDashboard();
-                    } else {
-                        // Mostrar sección de todos modos
-                        showSection('patients');
-                        showNotification('No se pudieron cargar los datos. Intente recargar más tarde.', 'error');
-                    }
-                }).catch(error => {
-                    addDebugInfo(`Error al cargar datos iniciales: ${error.message}`);
-                    // Mostrar sección de todos modos
-                    showSection('patients');
-                    showNotification('Error al cargar datos. Intente recargar la página.', 'error');
-                });
-            } else {
-                addDebugInfo('No hay usuario guardado, cargando datos desde API...');
-                // Cargar datos desde la API
-                loadDataFromAPI();
-            }
         });
     </script>
 </body>
