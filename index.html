@@ -930,8 +930,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="idNumber">Carnet de Identidad</label>
-                            <input type="text" id="idNumber" required>
+                            <label for="domicilio">Domicilio</label>
+                            <input type="text" id="domicilio" required>
                         </div>
                         
                         <div class="form-group">
@@ -1005,7 +1005,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre Completo</th>
-                                <th>Carnet de Identidad</th>
+                                <th>Domicilio</th>
                                 <th>Teléfono</th>
                                 <th>Tratamiento Actual</th>
                                 <th>Fecha de Registro</th>
@@ -1371,7 +1371,7 @@
                 const { data, error } = await supabase
                     .from('patients')
                     .select('*')
-                    .or(`full_name.ilike.%${query}%,id_number.ilike.%${query}%,phone.ilike.%${query}%`);
+                    .or(`full_name.ilike.%${query}%,domicilio.ilike.%${query}%,phone.ilike.%${query}%`);
                 
                 if (error) {
                     addDebugInfo(`Error al buscar pacientes: ${error.message}`);
@@ -1612,7 +1612,7 @@
             try {
                 // Obtener datos del formulario
                 const fullName = document.getElementById('fullName').value;
-                const idNumber = document.getElementById('idNumber').value;
+                const domicilio = document.getElementById('domicilio').value;
                 const phone = document.getElementById('phone').value;
                 const treatmentType = document.getElementById('treatmentType').value;
                 const treatmentPrice = parseFloat(document.getElementById('treatmentPrice').value);
@@ -1624,7 +1624,7 @@
                 // Crear nuevo paciente
                 const newPatient = {
                     full_name: fullName,
-                    id_number: idNumber,
+                    domicilio: domicilio,
                     phone: phone,
                     registered_by: "user",
                     registration_date: new Date().toISOString().split('T')[0]
@@ -2085,7 +2085,7 @@
                 row.innerHTML = `
                     <td>${patient.id}</td>
                     <td>${patient.full_name}</td>
-                    <td>${patient.id_number}</td>
+                    <td>${patient.domicilio}</td>
                     <td>${patient.phone}</td>
                     <td>
                         ${patientTreatments.length > 0 ? 
@@ -2204,6 +2204,7 @@
                     const statusText = payment.status === 'paid' ? 'Pagado' : (payment.status === 'pending' ? 'Pendiente' : 'Vencido');
                     
                     modalContent += `
+
                         <tr>
                             <td>${payment.id}</td>
                             <td>${payment.treatment_id}</td>
