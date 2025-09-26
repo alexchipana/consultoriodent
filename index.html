@@ -820,6 +820,81 @@
                 padding: 8px;
             }
         }
+        
+        .fdi-piece {
+            background:#f5f5f5;border:1px solid #bbb;border-radius:4px;padding:4px 0;font-size:13px;cursor:pointer;transition:background 0.2s;
+        }
+        .fdi-piece.selected {
+            background:#1976d2;color:#fff;border-color:#1976d2;
+        }
+        .fdi-piece-paciente {
+            background:#f5f5f5;border:1px solid #bbb;border-radius:4px;padding:4px 0;font-size:13px;cursor:pointer;transition:background 0.2s;
+        }
+        .fdi-piece-paciente.selected {
+            background:#1976d2;color:#fff;border-color:#1976d2;
+        }
+        
+        /* Alinear y optimizar campos de tratamiento */
+        .treatment-fields-row {
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .treatment-field {
+            flex: 1 1 180px;
+            min-width: 160px;
+        }
+        .treatment-field-saldo {
+            flex: 0 1 180px;
+            min-width: 120px;
+            max-width: 180px;
+        }
+        
+        .form-section-box {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 18px 18px 10px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 4px rgba(32,67,98,0.04);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+        .form-section-box label {
+            font-weight: 500;
+        }
+        .form-section-box .form-group {
+            flex: 1 1 180px;
+            min-width: 160px;
+            margin-bottom: 10px;
+        }
+        .form-section-box .treatment-fields-row {
+            width: 100%;
+            gap: 18px;
+        }
+        .treatment-modal-section-box {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 18px 18px 10px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 4px rgba(32,67,98,0.04);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+        .treatment-modal-section-box label {
+            font-weight: 500;
+        }
+        .treatment-modal-section-box .form-group {
+            flex: 1 1 180px;
+            min-width: 160px;
+            margin-bottom: 10px;
+        }
+        .treatment-modal-section-box .treatment-fields-row {
+            width: 100%;
+            gap: 18px;
+        }
     </style>
 </head>
 <body>
@@ -923,22 +998,21 @@
             <section id="register" class="content-section form-section" style="display: none;">
                 <h2 class="section-title">Registrar Nuevo Paciente</h2>
                 <form id="patientForm">
-                    <div class="form-grid">
+                    <div class="form-section-box">
                         <div class="form-group">
                             <label for="fullName">Nombre Completo</label>
                             <input type="text" id="fullName" required>
                         </div>
-                        
                         <div class="form-group">
                             <label for="domicilio">Domicilio</label>
                             <input type="text" id="domicilio" required>
                         </div>
-                        
                         <div class="form-group">
                             <label for="phone">Teléfono</label>
                             <input type="tel" id="phone" required>
                         </div>
-                        
+                    </div>
+                    <div class="form-section-box">
                         <div class="form-group">
                             <label for="treatmentType">Tipo de Tratamiento</label>
                             <select id="treatmentType" required>
@@ -956,23 +1030,66 @@
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="treatmentPrice">Precio del Tratamiento (Bs.)</label>
-                            <input type="number" id="treatmentPrice" min="0" step="0.01" required>
+                            <label for="customTreatmentPaciente">Otro tratamiento:</label>
+                            <input type="text" id="customTreatmentPaciente" name="customTreatmentPaciente" placeholder="Describa el tratamiento...">
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="advancePayment">Adelanto (Bs.)</label>
-                            <input type="number" id="advancePayment" min="0" step="0.01" required>
+                        <div class="form-group" style="min-width:260px;max-width:340px;">
+                            <label>Piezas dentales (FDI):</label>
+                            <div id="fdiGridPaciente" style="display:grid;grid-template-columns:repeat(8,32px);gap:6px;justify-content:start;margin-top:6px;">
+                                <button type="button" class="fdi-piece-paciente" data-piece="18">18</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="17">17</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="16">16</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="15">15</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="14">14</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="13">13</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="12">12</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="11">11</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="21">21</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="22">22</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="23">23</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="24">24</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="25">25</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="26">26</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="27">27</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="28">28</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="38">38</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="37">37</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="36">36</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="35">35</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="34">34</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="33">33</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="32">32</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="31">31</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="41">41</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="42">42</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="43">43</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="44">44</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="45">45</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="46">46</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="47">47</button>
+                                <button type="button" class="fdi-piece-paciente" data-piece="48">48</button>
+                            </div>
+                            <input type="hidden" id="fdiPiecesPaciente" name="fdiPiecesPaciente">
+                            <div id="fdiSelectedListPaciente" style="margin-top:6px;font-size:14px;color:#333;"></div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="remainingBalance">Saldo Pendiente (Bs.)</label>
-                        <input type="number" id="remainingBalance" min="0" step="0.01" readonly>
+                    <div class="form-section-box">
+                        <div class="treatment-fields-row">
+                            <div class="treatment-field">
+                                <label for="treatmentPrice">Precio del Tratamiento (Bs.)</label>
+                                <input type="number" id="treatmentPrice" required>
+                            </div>
+                            <div class="treatment-field">
+                                <label for="advancePayment">Adelanto (Bs.)</label>
+                                <input type="number" id="advancePayment" required>
+                            </div>
+                            <div class="treatment-field-saldo">
+                                <label for="pendingBalance">Saldo Pendiente (Bs.)</label>
+                                <input type="text" id="pendingBalance" readonly>
+                            </div>
+                        </div>
                     </div>
-                    
                     <button type="submit" class="btn btn-primary">
                         <i class="material-icons">save</i>
                         Registrar Paciente
@@ -986,10 +1103,7 @@
                 
                 <div class="action-bar">
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="showSection('register')" style="display:flex;align-items:center;gap:6px;">
-                            <span class="material-icons" style="font-size:20px;vertical-align:middle;">person_add</span>
-                            <span style="vertical-align:middle;">Registrar Paciente</span>
-                        </button>
+                        <!-- Eliminar el botón 'Registrar Paciente' debajo de 'Pacientes Registrados' -->
                     </div>
                     <div class="search-box">
                         <div class="search-container">
@@ -1056,8 +1170,7 @@
                 <div class="modal-body">
                     <form id="treatmentForm">
                         <input type="hidden" id="treatmentPatientId">
-                        
-                        <div class="form-grid">
+                        <div class="treatment-modal-section-box">
                             <div class="form-group">
                                 <label for="treatmentType2">Tipo de Tratamiento</label>
                                 <select id="treatmentType2" required>
@@ -1077,21 +1190,34 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="treatmentPrice2">Precio del Tratamiento (Bs.)</label>
-                                <input type="number" id="treatmentPrice2" min="0" step="0.01" required>
+                                <label for="customTreatment2">Otro tratamiento:</label>
+                                <input type="text" id="customTreatment2" name="customTreatment2" placeholder="Describa el tratamiento...">
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="advancePayment2">Adelanto (Bs.)</label>
-                                <input type="number" id="advancePayment2" min="0" step="0.01" required>
+                            <div class="form-group" style="min-width:260px;max-width:340px;">
+                                <label>Piezas dentales (FDI):</label>
+                                <div id="fdiGrid" style="display:grid;grid-template-columns:repeat(8,32px);gap:6px;justify-content:start;margin-top:6px;">
+                                    <!-- botones de piezas dentales aquí -->
+                                </div>
+                                <input type="hidden" id="fdiPiecesSelected" name="fdiPiecesSelected">
+                                <div id="fdiSelectedList" style="margin-top:6px;font-size:14px;color:#333;"></div>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="remainingBalance2">Saldo Pendiente (Bs.)</label>
-                            <input type="number" id="remainingBalance2" min="0" step="0.01" readonly>
+                        <div class="treatment-modal-section-box">
+                            <div class="treatment-fields-row">
+                                <div class="treatment-field">
+                                    <label for="treatmentPrice2">Precio del Tratamiento (Bs.)</label>
+                                    <input type="number" id="treatmentPrice2" min="0" step="0.01" required>
+                                </div>
+                                <div class="treatment-field">
+                                    <label for="advancePayment2">Adelanto (Bs.)</label>
+                                    <input type="number" id="advancePayment2" min="0" step="0.01" required>
+                                </div>
+                                <div class="treatment-field-saldo">
+                                    <label for="remainingBalance2">Saldo Pendiente (Bs.)</label>
+                                    <input type="number" id="remainingBalance2" min="0" step="0.01" readonly>
+                                </div>
+                            </div>
                         </div>
-                        
                         <div style="display: flex; justify-content: flex-end; gap: 10px;">
                             <button type="button" class="btn btn-secondary" onclick="closeAddTreatmentModal()">Cancelar</button>
                             <button type="submit" class="btn btn-primary">
@@ -1608,19 +1734,20 @@
         // Manejar envío del formulario
         async function handleFormSubmit(e) {
             e.preventDefault();
-            
             try {
                 // Obtener datos del formulario
                 const fullName = document.getElementById('fullName').value;
                 const domicilio = document.getElementById('domicilio').value;
                 const phone = document.getElementById('phone').value;
                 const treatmentType = document.getElementById('treatmentType').value;
+                const customTreatment = document.getElementById('customTreatmentPaciente').value;
+                const fdiPieces = document.getElementById('fdiPiecesPaciente').value;
                 const treatmentPrice = parseFloat(document.getElementById('treatmentPrice').value);
                 const advancePayment = parseFloat(document.getElementById('advancePayment').value);
-                const remainingBalance = parseFloat(document.getElementById('remainingBalance').value);
-                
+                const remainingBalance = parseFloat(document.getElementById('pendingBalance').value);
+
                 addDebugInfo(`Registrando nuevo paciente: ${fullName}`);
-                
+
                 // Crear nuevo paciente
                 const newPatient = {
                     full_name: fullName,
@@ -1629,21 +1756,28 @@
                     registered_by: "user",
                     registration_date: new Date().toISOString().split('T')[0]
                 };
-                
+
                 // Agregar paciente a Supabase
                 const patientId = await addPatientToAPI(newPatient);
-                
+
+                // Determinar tipo de tratamiento final
+                let finalTreatmentType = treatmentType;
+                if (treatmentType === 'Otro' && customTreatment.trim() !== '') {
+                    finalTreatmentType = customTreatment.trim();
+                }
+
                 // Crear nuevo tratamiento
                 const newTreatment = {
                     patient_id: patientId,
-                    type: treatmentType,
+                    type: finalTreatmentType,
                     price: treatmentPrice,
-                    date: new Date().toISOString().split('T')[0]
+                    date: new Date().toISOString().split('T')[0],
+                    fdi_pieces: fdiPieces // Guardar piezas dentales seleccionadas
                 };
-                
+
                 // Agregar tratamiento a Supabase
                 const treatmentId = await addTreatmentToAPI(newTreatment);
-                
+
                 // Crear nuevo pago
                 const newPayment = {
                     treatment_id: treatmentId,
@@ -1651,22 +1785,27 @@
                     date: new Date().toISOString().split('T')[0],
                     status: remainingBalance > 0 ? "pending" : "paid"
                 };
-                
+
                 // Agregar pago a Supabase
                 await addPaymentToAPI(newPayment);
-                
+
                 // Recargar datos desde la API
                 await loadDataFromAPI();
-                
-                // Reiniciar formulario
+
+                // Reiniciar formulario y limpiar selección de piezas
                 document.getElementById('patientForm').reset();
-                
+                if (document.getElementById('fdiGridPaciente')) {
+                    document.querySelectorAll('.fdi-piece-paciente.selected').forEach(btn => btn.classList.remove('selected'));
+                    document.getElementById('fdiPiecesPaciente').value = '';
+                    document.getElementById('fdiSelectedListPaciente').textContent = '';
+                }
+
                 // Mostrar notificación
                 showNotification('Paciente registrado con éxito');
-                
+
                 // Actualizar dashboard
                 updateDashboard();
-                
+
                 // Volver a la tabla de pacientes
                 showSection('patients');
             } catch (error) {
@@ -1681,7 +1820,7 @@
             const advance = parseFloat(document.getElementById('advancePayment').value) || 0;
             const balance = price - advance;
             
-            document.getElementById('remainingBalance').value = balance.toFixed(2);
+            document.getElementById('pendingBalance').value = balance.toFixed(2);
         }
         
         // Calcular saldo pendiente para el modal de tratamiento
@@ -1705,6 +1844,9 @@
                 const advancePayment = parseFloat(document.getElementById('advancePayment2').value);
                 const remainingBalance = parseFloat(document.getElementById('remainingBalance2').value);
                 
+                // Obtener pieza dental FDI
+                const fdiPieces = document.getElementById('fdiPiecesSelected').value;
+                
                 addDebugInfo(`Agregando tratamiento al paciente ID: ${patientId}`);
                 
                 // Crear nuevo tratamiento
@@ -1712,7 +1854,8 @@
                     patient_id: patientId,
                     type: treatmentType,
                     price: treatmentPrice,
-                    date: new Date().toISOString().split('T')[0]
+                    date: new Date().toISOString().split('T')[0],
+                    fdi_pieces: fdiPieces // Incluir piezas dentales FDI
                 };
                 
                 // Agregar tratamiento a Supabase
@@ -1850,7 +1993,6 @@
                 let modalContent = `
                     <div class="patient-header">
                         <h2>${patient.full_name}</h2>
-                        <p><strong>Carnet de Identidad:</strong> ${patient.id_number}</p>
                         <p><strong>Teléfono:</strong> ${patient.phone}</p>
                         <p><strong>Fecha de Registro:</strong> ${formatDate(patient.registration_date)}</p>
                     </div>
@@ -1867,6 +2009,7 @@
                                 <tr>
                                     <th>Tratamiento</th>
                                     <th>Fecha</th>
+                                    <th>Piezas (FDI)</th>
                                     <th>Precio (Bs.)</th>
                                     <th>Adelanto (Bs.)</th>
                                     <th>Saldo (Bs.)</th>
@@ -1881,11 +2024,11 @@
                     const status = payment ? payment.status : 'pending';
                     const statusClass = status === 'paid' ? 'status-paid' : (status === 'pending' ? 'status-pending' : 'status-overdue');
                     const statusText = status === 'paid' ? 'Pagado' : (status === 'pending' ? 'Pendiente' : 'Vencido');
-                    
                     modalContent += `
                         <tr>
                             <td>${treatment.type}</td>
                             <td>${formatDate(treatment.date)}</td>
+                            <td>${treatment.fdi_pieces ? treatment.fdi_pieces : '-'}</td>
                             <td>Bs. ${treatment.price.toFixed(2)}</td>
                             <td>Bs. ${payment ? parseFloat(payment.amount).toFixed(2) : '0.00'}</td>
                             <td>Bs. ${(treatment.price - (payment ? parseFloat(payment.amount) : 0)).toFixed(2)}</td>
@@ -1940,6 +2083,42 @@
         // Abrir modal para agregar tratamiento
         function openAddTreatmentModal(patientId) {
             document.getElementById('treatmentPatientId').value = patientId;
+            // Renderizar botones FDI si no existen
+            const fdiGrid = document.getElementById('fdiGrid');
+            if (fdiGrid && fdiGrid.children.length === 0) {
+                const piezas = [
+                    18,17,16,15,14,13,12,11,
+                    21,22,23,24,25,26,27,28,
+                    38,37,36,35,34,33,32,31,
+                    41,42,43,44,45,46,47,48
+                ];
+                piezas.forEach(num => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'fdi-piece';
+                    btn.setAttribute('data-piece', num);
+                    btn.textContent = num;
+                    btn.addEventListener('click', function() {
+                        const fdiInput = document.getElementById('fdiPiecesSelected');
+                        const fdiList = document.getElementById('fdiSelectedList');
+                        let selected = fdiInput.value ? fdiInput.value.split(',') : [];
+                        if (selected.includes(String(num))) {
+                            selected = selected.filter(x => x !== String(num));
+                            btn.classList.remove('selected');
+                        } else {
+                            selected.push(String(num));
+                            btn.classList.add('selected');
+                        }
+                        fdiInput.value = selected.join(',');
+                        fdiList.textContent = selected.length ? 'Seleccionadas: ' + selected.join(', ') : '';
+                    });
+                    fdiGrid.appendChild(btn);
+                });
+            }
+            // Limpiar selección previa
+            document.getElementById('fdiPiecesSelected').value = '';
+            document.getElementById('fdiSelectedList').textContent = '';
+            document.querySelectorAll('#fdiGrid .fdi-piece').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('addTreatmentModal').style.display = 'flex';
         }
         
@@ -2105,7 +2284,7 @@
                 tableBody.appendChild(row);
             });
             
-            addDebugInfo(`Tabla de pacientes llenada con ${sortedPatients.length} registros`);
+            addDebugInfo(`Tabla de pacientes llenada with ${sortedPatients.length} registros`);
         }
         
         // Mostrar detalles de cobros diarios
@@ -2136,6 +2315,7 @@
                     const statusClass = payment.status === 'paid' ? 'status-paid' : (payment.status === 'pending' ? 'status-pending' : 'status-overdue');
                     const statusText = payment.status === 'paid' ? 'Pagado' : (payment.status === 'pending' ? 'Pendiente' : 'Vencido');
                     
+                                       
                     modalContent += `
                         <tr>
                             <td>${payment.id}</td>
@@ -2312,6 +2492,49 @@
             // Aquí podrías abrir un modal o prompt para registrar el pago total pendiente
             alert('Funcionalidad para completar el saldo pendiente del paciente ID: ' + patientId);
             // Aquí iría la lógica real para registrar el pago en Supabase
+        }
+        
+        // Selector interactivo de piezas dentales FDI
+        if (document.getElementById('fdiGrid')) {
+            const fdiButtons = document.querySelectorAll('.fdi-piece');
+            const fdiInput = document.getElementById('fdiPiecesSelected');
+            const fdiList = document.getElementById('fdiSelectedList');
+            let selected = [];
+            fdiButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const val = this.getAttribute('data-piece');
+                    if (selected.includes(val)) {
+                        selected = selected.filter(x => x !== val);
+                        this.classList.remove('selected');
+                    } else {
+                        selected.push(val);
+                        this.classList.add('selected');
+                    }
+                    fdiInput.value = selected.join(',');
+                    fdiList.textContent = selected.length ? 'Seleccionadas: ' + selected.join(', ') : '';
+                });
+            });
+        }
+        // Selector interactivo de piezas dentales FDI en REGISTRAR PACIENTE
+        if (document.getElementById('fdiGridPaciente')) {
+            const fdiButtonsP = document.querySelectorAll('.fdi-piece-paciente');
+            const fdiInputP = document.getElementById('fdiPiecesPaciente');
+            const fdiListP = document.getElementById('fdiSelectedListPaciente');
+            let selectedP = [];
+            fdiButtonsP.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const val = this.getAttribute('data-piece');
+                    if (selectedP.includes(val)) {
+                        selectedP = selectedP.filter(x => x !== val);
+                        this.classList.remove('selected');
+                    } else {
+                        selectedP.push(val);
+                        this.classList.add('selected');
+                    }
+                    fdiInputP.value = selectedP.join(',');
+                    fdiListP.textContent = selectedP.length ? 'Seleccionadas: ' + selectedP.join(', ') : '';
+                });
+            });
         }
     </script>
 </body>
