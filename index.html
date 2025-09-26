@@ -1980,12 +1980,15 @@
                 // Calcular totales
                 let totalPaid = 0;
                 let totalPending = 0;
-                
-                (payments || []).forEach(payment => {
-                    if (payment.status === 'paid') {
-                        totalPaid += parseFloat(payment.amount);
+                (treatments || []).forEach(treatment => {
+                    const payment = (payments || []).find(p => p.treatment_id === treatment.id);
+                    const pagado = payment ? parseFloat(payment.amount) : 0;
+                    const saldo = treatment.price - pagado;
+                    if (payment && payment.status === 'paid') {
+                        totalPaid += pagado;
                     } else {
-                        totalPending += parseFloat(payment.amount);
+                        totalPaid += pagado;
+                        totalPending += saldo > 0 ? saldo : 0;
                     }
                 });
                 
@@ -2024,14 +2027,16 @@
                     const status = payment ? payment.status : 'pending';
                     const statusClass = status === 'paid' ? 'status-paid' : (status === 'pending' ? 'status-pending' : 'status-overdue');
                     const statusText = status === 'paid' ? 'Pagado' : (status === 'pending' ? 'Pendiente' : 'Vencido');
+                    const pagado = payment ? parseFloat(payment.amount) : 0;
+                    const saldo = treatment.price - pagado;
                     modalContent += `
                         <tr>
                             <td>${treatment.type}</td>
                             <td>${formatDate(treatment.date)}</td>
                             <td>${treatment.fdi_pieces ? treatment.fdi_pieces : '-'}</td>
                             <td>Bs. ${treatment.price.toFixed(2)}</td>
-                            <td>Bs. ${payment ? parseFloat(payment.amount).toFixed(2) : '0.00'}</td>
-                            <td>Bs. ${(treatment.price - (payment ? parseFloat(payment.amount) : 0)).toFixed(2)}</td>
+                            <td>Bs. ${pagado.toFixed(2)}</td>
+                            <td>Bs. ${saldo.toFixed(2)}</td>
                             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         </tr>
                     `;
@@ -2101,13 +2106,12 @@
                     btn.addEventListener('click', function() {
                         const fdiInput = document.getElementById('fdiPiecesSelected');
                         const fdiList = document.getElementById('fdiSelectedList');
-                        let selected = fdiInput.value ? fdiInput.value.split(',') : [];
-                        if (selected.includes(String(num))) {
-                            selected = selected.filter(x => x !== String(num));
-                            btn.classList.remove('selected');
-                        } else {
+                        let selected = [];
+                        btn.classList.toggle('selected');
+                        if (btn.classList.contains('selected')) {
                             selected.push(String(num));
-                            btn.classList.add('selected');
+                        } else {
+                            selected = selected.filter(x => x !== String(num));
                         }
                         fdiInput.value = selected.join(',');
                         fdiList.textContent = selected.length ? 'Seleccionadas: ' + selected.join(', ') : '';
@@ -2315,7 +2319,6 @@
                     const statusClass = payment.status === 'paid' ? 'status-paid' : (payment.status === 'pending' ? 'status-pending' : 'status-overdue');
                     const statusText = payment.status === 'paid' ? 'Pagado' : (payment.status === 'pending' ? 'Pendiente' : 'Vencido');
                     
-                                       
                     modalContent += `
                         <tr>
                             <td>${payment.id}</td>
@@ -2488,10 +2491,27 @@
         });
         
         // Agrega la función para completar el saldo pendiente
-        function completePendingBalance(patientId) {
-            // Aquí podrías abrir un modal o prompt para registrar el pago total pendiente
-            alert('Funcionalidad para completar el saldo pendiente del paciente ID: ' + patientId);
-            // Aquí iría la lógica real para registrar el pago en Supabase
+        async function completePendingBalance(patientId) {
+            const patientTreatments = (treatments || []).filter(t => t.patient_id === patientId);
+            patientTreatments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const latest = patientTreatments.find(t => {
+                const payment = (payments || []).find(p => p.treatment_id === t.id);
+                return payment && payment.status === 'pending';
+            });
+            if (!latest) {
+                showNotification('No hay saldo pendiente para completar', 'info');
+                return;
+            }
+            const payment = (payments || []).find(p => p.treatment_id === latest.id);
+            const saldo = latest.price - (payment ? parseFloat(payment.amount) : 0);
+            if (saldo <= 0) {
+                showNotification('El saldo ya está pagado', 'info');
+                return;
+            }
+            await supabase.from('payments').update({ amount: latest.price, status: 'paid' }).eq('id', payment.id);
+            showNotification('Saldo completado y marcado como pagado');
+            await loadDataFromAPI();
+            showPatientDetails(patientId);
         }
         
         // Selector interactivo de piezas dentales FDI
